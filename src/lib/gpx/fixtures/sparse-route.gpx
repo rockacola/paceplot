@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="paceplot-fixture" xmlns="http://www.topografix.com/GPX/1/1">
+  <rte>
+    <name>Sparse Planning Route</name>
+    <rtept lat="-33.8688" lon="151.2093"></rtept>
+    <rtept lat="-33.8650" lon="151.2100"></rtept>
+    <rtept lat="-33.8600" lon="151.2120"></rtept>
+    <rtept lat="-33.8550" lon="151.2150"></rtept>
+  </rte>
+</gpx>

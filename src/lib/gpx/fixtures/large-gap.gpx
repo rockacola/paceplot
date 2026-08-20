@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="paceplot-fixture" xmlns="http://www.topografix.com/GPX/1/1">
+  <trk>
+    <name>Large Gap Track</name>
+    <trkseg>
+      <trkpt lat="-33.868800" lon="151.209300"></trkpt>
+      <trkpt lat="-33.868350" lon="151.209300"></trkpt>
+      <trkpt lat="-33.867900" lon="151.209300"></trkpt>
+      <trkpt lat="-33.867450" lon="151.209300"></trkpt>
+      <trkpt lat="-33.867000" lon="151.209300"></trkpt>
+      <trkpt lat="-33.866550" lon="151.209300"></trkpt>
+      <trkpt lat="-33.821550" lon="151.209300"></trkpt>
+      <trkpt lat="-33.821100" lon="151.209300"></trkpt>
+      <trkpt lat="-33.820650" lon="151.209300"></trkpt>
+      <trkpt lat="-33.820200" lon="151.209300"></trkpt>
+      <trkpt lat="-33.819750" lon="151.209300"></trkpt>
+      <trkpt lat="-33.819300" lon="151.209300"></trkpt>
+    </trkseg>
+  </trk>
+</gpx>
