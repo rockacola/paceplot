@@ -33,4 +33,17 @@ describe('MapView', () => {
     );
     expect(container.querySelector('.leaflet-marker-icon')).not.toBeNull();
   });
+
+  it('renders the runner marker as a colored dot, not the default pin', () => {
+    const { container } = render(
+      <MapView
+        route={route}
+        runnerPosition={{ lat: -33.8683, lng: 151.2093 }}
+        runnerColor="#ff0000"
+      />
+    );
+    const marker = container.querySelector('.runner-dot-marker');
+    expect(marker).not.toBeNull();
+    expect(marker?.querySelector('span')).toHaveStyle({ background: '#ff0000' });
+  });
 });

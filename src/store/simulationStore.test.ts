@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { useSimulationStore } from './simulationStore';
 import { buildRoutePoints } from '../lib/geometry/routeGeometry';
+import { DEFAULT_PLAYBACK_SPEED } from '../config/simulationConfig';
 import type { Route } from '../types/route';
 import type { Runner } from '../types/runner';
 
@@ -19,6 +20,7 @@ const runner: Runner = {
   name: 'Test runner',
   startTime: new Date('2026-08-20T08:00:00Z'),
   pace: { minPerKm: 5 },
+  color: '#2563eb',
 };
 
 describe('useSimulationStore', () => {
@@ -37,6 +39,7 @@ describe('useSimulationStore', () => {
     expect(state.runner).toBeNull();
     expect(state.clockTime).toBeNull();
     expect(state.isPlaying).toBe(false);
+    expect(state.playbackSpeed).toBe(DEFAULT_PLAYBACK_SPEED);
   });
 
   it('setRoute stores the route', () => {
@@ -60,5 +63,10 @@ describe('useSimulationStore', () => {
     expect(useSimulationStore.getState().isPlaying).toBe(true);
     useSimulationStore.getState().setIsPlaying(false);
     expect(useSimulationStore.getState().isPlaying).toBe(false);
+  });
+
+  it('setPlaybackSpeed stores the playback speed', () => {
+    useSimulationStore.getState().setPlaybackSpeed(40);
+    expect(useSimulationStore.getState().playbackSpeed).toBe(40);
   });
 });

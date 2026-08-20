@@ -1,64 +1,73 @@
-import { useState } from 'react';
-import { useSimulationStore } from '../store/simulationStore';
+type RunnerControlsProps = {
+  timeValue: string;
+  setTimeValue: (value: string) => void;
+  paceMinValue: string;
+  setPaceMinValue: (value: string) => void;
+  paceSecValue: string;
+  setPaceSecValue: (value: string) => void;
+  color: string;
+};
 
-function toStartTime(timeValue: string): Date | null {
-  const [hoursStr, minutesStr] = timeValue.split(':');
-  const hours = Number(hoursStr);
-  const minutes = Number(minutesStr);
-  if (!timeValue || Number.isNaN(hours) || Number.isNaN(minutes)) return null;
-  const date = new Date();
-  date.setHours(hours, minutes, 0, 0);
-  return date;
-}
-
-export function RunnerControls() {
-  const runner = useSimulationStore((state) => state.runner);
-  const setRunner = useSimulationStore((state) => state.setRunner);
-  const [timeValue, setTimeValue] = useState('');
-  const [paceValue, setPaceValue] = useState('');
-
-  function commit(nextTimeValue: string, nextPaceValue: string) {
-    const startTime = toStartTime(nextTimeValue);
-    const minPerKm = Number(nextPaceValue);
-    if (!startTime || !nextPaceValue || Number.isNaN(minPerKm) || minPerKm <= 0) return;
-    setRunner({
-      id: runner?.id ?? crypto.randomUUID(),
-      name: runner?.name ?? 'Runner 1',
-      startTime,
-      pace: { minPerKm },
-    });
-  }
-
+export function RunnerControls({
+  timeValue,
+  setTimeValue,
+  paceMinValue,
+  setPaceMinValue,
+  paceSecValue,
+  setPaceSecValue,
+  color,
+}: RunnerControlsProps) {
   return (
-    <div className="flex flex-col gap-2">
-      <label htmlFor="runner-start-time" className="text-sm font-medium text-slate-700">
-        Start time
-      </label>
-      <input
-        id="runner-start-time"
-        type="time"
-        value={timeValue}
-        onChange={(e) => {
-          setTimeValue(e.target.value);
-          commit(e.target.value, paceValue);
-        }}
-        className="text-sm"
+    <div className="flex gap-3">
+      <span
+        aria-hidden="true"
+        style={{ backgroundColor: color }}
+        className="mt-1 h-3.5 w-3.5 shrink-0 rounded-full"
       />
-      <label htmlFor="runner-pace" className="text-sm font-medium text-slate-700">
-        Pace (min/km)
-      </label>
-      <input
-        id="runner-pace"
-        type="number"
-        step="0.1"
-        min="0"
-        value={paceValue}
-        onChange={(e) => {
-          setPaceValue(e.target.value);
-          commit(timeValue, e.target.value);
-        }}
-        className="text-sm"
-      />
+      <div className="flex flex-1 flex-col gap-4">
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="runner-start-time" className="text-base font-medium text-slate-700">
+            Start time
+          </label>
+          <input
+            id="runner-start-time"
+            type="time"
+            value={timeValue}
+            onChange={(e) => setTimeValue(e.target.value)}
+            className="rounded border border-slate-300 px-2 py-1.5 text-base"
+          />
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <span id="runner-pace-label" className="text-base font-medium text-slate-700">
+            Pace (per km)
+          </span>
+          <div
+            role="group"
+            aria-labelledby="runner-pace-label"
+            className="flex items-center gap-1.5"
+          >
+            <input
+              aria-label="Pace minutes"
+              type="number"
+              min="0"
+              value={paceMinValue}
+              onChange={(e) => setPaceMinValue(e.target.value)}
+              className="w-16 rounded border border-slate-300 px-2 py-1.5 text-base"
+            />
+            <span className="text-base text-slate-500">min</span>
+            <input
+              aria-label="Pace seconds"
+              type="number"
+              min="0"
+              max="59"
+              value={paceSecValue}
+              onChange={(e) => setPaceSecValue(e.target.value)}
+              className="w-16 rounded border border-slate-300 px-2 py-1.5 text-base"
+            />
+            <span className="text-base text-slate-500">sec</span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

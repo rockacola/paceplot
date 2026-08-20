@@ -22,6 +22,7 @@ const runner: Runner = {
   name: 'Test runner',
   startTime: new Date('2026-08-20T08:00:00Z'),
   pace: { minPerKm: 5 },
+  color: '#2563eb',
 };
 
 describe('Timeline', () => {
@@ -46,9 +47,16 @@ describe('Timeline', () => {
     expect(screen.getByRole('button', { name: /pause/i })).toBeInTheDocument();
   });
 
-  it('renders nothing actionable without a runner', () => {
+  it('renders a disabled scrubber and play button without a runner, instead of unmounting', () => {
     useSimulationStore.setState({ route, runner: null, clockTime: null, isPlaying: false });
     render(<Timeline />);
-    expect(screen.queryByRole('slider')).not.toBeInTheDocument();
+    expect(screen.getByRole('slider')).toBeDisabled();
+    expect(screen.getByRole('button', { name: /play/i })).toBeDisabled();
+  });
+
+  it('enables the controls once a route and runner both exist', () => {
+    render(<Timeline />);
+    expect(screen.getByRole('slider')).toBeEnabled();
+    expect(screen.getByRole('button', { name: /play/i })).toBeEnabled();
   });
 });

@@ -1,6 +1,6 @@
 # Phase 2: UX polish
 
-**Status:** planning
+**Status:** built (2026-08-21), pending the user's own in-browser check
 
 ## Mini plan
 
@@ -61,8 +61,82 @@ Phase 1 proved the core loop end to end but the UI was built for correctness, no
 
 ## Tech spec
 
-(Fill in once the mini plan is settled: data model changes, algorithms, module breakdown, resolved decisions.)
+Proceeding with all three flagged proposals as defaults (x20 playback speed, fixed decorative runner color, 30fps): none were overridden.
+
+### Data model changes
+
+- `Runner` gains `color: string` (hex), decorative only, not user-editable this phase.
+- `SimulationState` (store) gains `playbackSpeed: PlaybackSpeed` + `setPlaybackSpeed`.
+
+### New config (single source of truth for the tunables this phase asked for)
+
+- `src/config/simulationConfig.ts` — `SIMULATION_FPS` (30), `TICK_INTERVAL_MS` derived from it, `PLAYBACK_SPEED_OPTIONS` (`[10, 20, 40]`), `DEFAULT_PLAYBACK_SPEED` (20).
+- `src/config/runnerDefaults.ts` — `DEFAULT_START_TIME` ('07:30'), `DEFAULT_PACE_MIN` (6), `DEFAULT_PACE_SEC` (0), `DEFAULT_RUNNER_COLOR`.
+- `src/config/predefinedRoutes.ts` — `PREDEFINED_ROUTES: { id, name, url }[]`, one entry: `{ id: 'whale-rock-trial-race-17km', name: 'Whale Rock Trial Race 17km', url: '<base>/routes/whale-rock-trail-race-17km.gpx' }`.
+
+### GPX loading, shared between upload and preset paths
+
+`lib/gpx/loadRouteFromGpxText.ts` (new, pure) wraps `validateGpx` + `parseGpx` into one `{ route } | { error }` result, used by both `useGpxUpload` (unchanged behavior, refactored internals) and the new preset loader. The GPX's own embedded `<trk><name>` (this file's is "16.8km route") is overridden with the preset's given display name when loading a preset, so the dropdown label and the loaded-route name always agree; an uploaded file keeps using its embedded name as before.
+
+### Version display
+
+`vite.config.ts` reads `package.json`'s version via `node:fs` (avoids import-assertion syntax questions) and injects `__APP_VERSION__` through `define`; declared in `vite-env.d.ts`.
 
 ## Solution design
 
-(Fill in once the tech spec is settled: file layout, component contracts, implementation order.)
+### New files
+
+- `src/config/simulationConfig.ts`, `src/config/runnerDefaults.ts`, `src/config/predefinedRoutes.ts`
+- `src/lib/gpx/loadRouteFromGpxText.ts` (+ test)
+- `src/hooks/useRouteSelect.ts` (+ test) — owns the dropdown's selected value, preset fetch/load state; delegates to the existing `useGpxUpload`/`GpxUpload` when "Upload your own…" is chosen
+- `src/components/RouteSelect.tsx` (+ test) — dropdown, nests `<GpxUpload />` when upload mode is active
+- `src/hooks/useRunnerForm.ts` (+ test) — local (uncommitted) form state for start time + pace, defaults committed once on mount, `apply()` commits to the store on demand
+- `src/components/PlaybackSpeedControl.tsx` (+ test) — x10/x20/x40 buttons bound directly to the store (no Apply, per the resolved decision)
+- `public/routes/whale-rock-trail-race-17km.gpx` — copied from the Downloads source
+
+### Changed files
+
+- `src/types/runner.ts` — add `color`
+- `src/store/simulationStore.ts` — add `playbackSpeed` / `setPlaybackSpeed`
+- `src/hooks/useGpxUpload.ts` — refactor onto `loadRouteFromGpxText`, behavior unchanged
+- `src/hooks/useTimeline.ts` — tick interval from `simulationConfig`, multiplier from the store's `playbackSpeed` instead of a hardcoded constant, `play()` resets `clockTime` to `rangeStart` when called at/past `rangeEnd`
+- `src/components/Timeline.tsx` — always renders; play button and scrubber get the native `disabled` attribute when route or runner is missing, instead of the component unmounting
+- `src/components/RunnerControls.tsx` — rewritten onto `useRunnerForm`: color swatch + grouped start-time/pace block, pace as two number inputs (min, sec), Apply button
+- `src/components/MapView.tsx` — runner marker uses a `divIcon` circular dot (colored from the runner's `color`, default fallback) instead of Leaflet's default pin icon
+- `src/App.tsx` — sidebar split into three sectioned cards (Route / Runner / Playback), header shows "Paceplot" + smaller/lighter `(1.0.0)` from `__APP_VERSION__`
+- `src/vite-env.d.ts` — declare `__APP_VERSION__`
+- `vite.config.ts` — `define` for `__APP_VERSION__`
+- `package.json` — version → `1.0.0`
+
+### Test updates (behavior changed, tests change with it)
+
+- `RunnerControls.test.tsx` — rewritten: typing no longer writes to the store; only clicking Apply does
+- `Timeline.test.tsx` — rewritten: "no runner" case now asserts a disabled slider/button, not their absence; add a case for replay-from-start after reaching the end
+- `MapView.test.tsx` — add a case asserting the marker uses the dot icon, not the default pin
+- `useTimeline.test.ts` — add a case for the reached-the-end-then-Play-again reset
+
+### Implementation order
+
+1. Types + config files (no behavior change yet)
+2. `loadRouteFromGpxText` + refactor `useGpxUpload` onto it (tests first)
+3. Store: `playbackSpeed`
+4. `useTimeline`: configurable tick rate, store-driven multiplier, replay-on-end (tests first)
+5. `Timeline`: always-visible + disabled state (tests first)
+6. `RunnerControls` rewrite onto `useRunnerForm`: defaults, grouped mm:ss pace, color swatch, Apply (tests first)
+7. `RouteSelect` + `useRouteSelect`, GPX asset copied in (tests first)
+8. `PlaybackSpeedControl` (tests first)
+9. `MapView` dot marker
+10. `App.tsx` sectioning, header version, version bump, `vite.config.ts` define
+11. Full `npm run check` + `npm run test` + manual verification in the dev server
+
+## Outcome
+
+Built 2026-08-21, all 14 features from the mini plan implemented as specced, all three flagged proposals (x20 default playback speed, fixed decorative runner color, 30fps) kept as-is with no override from the user.
+
+New: `src/config/{simulationConfig,runnerDefaults,predefinedRoutes}.ts`, `lib/gpx/loadRouteFromGpxText.ts`, `hooks/{useRouteSelect,useRunnerForm}.ts`, `components/{RouteSelect,PlaybackSpeedControl}.tsx`, `public/routes/whale-rock-trail-race-17km.gpx`. Changed: `types/runner.ts` (+`color`), `store/simulationStore.ts` (+`playbackSpeed`), `hooks/useGpxUpload.ts` (refactored onto the shared loader), `hooks/useTimeline.ts` (configurable tick rate, store-driven multiplier, replay-on-end), `components/{Timeline,RunnerControls,MapView}.tsx`, `App.tsx`, `vite.config.ts` / `vite-env.d.ts` (version injection), `package.json` (→ 1.0.0).
+
+10 new/rewritten test files, 64 tests total, all passing. `npm run check` (format + lint + typecheck), `npm run test`, `npm run build`, and `npm run build-storybook` all green.
+
+**Not done this session**: a live in-browser walkthrough. Both available browser-automation paths failed in this environment (the Chrome extension wasn't connected; Maestro's Chromium session errored twice in a row with `invalid session id` / connection refused). The dev server was left running at `http://localhost:5175/` for the user to check by hand rather than continuing to retry a broken tool path.
+
+**Bug found in that manual check, fixed same day**: re-applying runner values (e.g. changing start time and clicking Apply) made the marker disappear, and Play didn't bring it back. Cause: `clockTime` in the store is an absolute `Date`; `apply()` wrote a new `runner.startTime` but never touched `clockTime`, so a start time moved later than the already-stored `clockTime` left `getRunnerPosition` computing negative elapsed time (marker hidden) until playback happened to tick past the new start. Fix: `apply()` now also resets `clockTime` to the new `startTime` and stops playback, so applying restarts the simulation display cleanly at the new start. Regression test added in `useRunnerForm.test.ts`. 65 tests passing, `npm run check` clean.

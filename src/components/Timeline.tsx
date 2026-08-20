@@ -2,33 +2,41 @@ import { useTimeline } from '../hooks/useTimeline';
 import { useSimulationStore } from '../store/simulationStore';
 
 export function Timeline() {
+  const route = useSimulationStore((state) => state.route);
   const runner = useSimulationStore((state) => state.runner);
   const { rangeStart, rangeEnd, clockTime, isPlaying, scrub, play, pause } = useTimeline();
 
-  if (!runner) return null;
-
+  const isReady = Boolean(route && runner);
   const current = clockTime ?? rangeStart;
 
   return (
     <div className="flex items-center gap-3">
       <button
         type="button"
+        disabled={!isReady}
         onClick={isPlaying ? pause : play}
-        className="rounded bg-slate-700 px-3 py-1 text-sm text-white"
+        className="cursor-pointer rounded bg-slate-700 px-4 py-2 text-base text-white hover:bg-slate-600 active:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:hover:bg-slate-300 disabled:active:bg-slate-300"
       >
         {isPlaying ? 'Pause' : 'Play'}
       </button>
       <input
         type="range"
         role="slider"
+        disabled={!isReady}
         min={rangeStart.getTime()}
         max={rangeEnd.getTime()}
         value={current.getTime()}
         onChange={(e) => scrub(new Date(Number(e.target.value)))}
-        className="flex-1"
+        className="flex-1 disabled:cursor-not-allowed disabled:opacity-40"
       />
-      <span className="text-sm tabular-nums text-slate-600">
-        {current.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+      <span className="text-base tabular-nums text-slate-600">
+        {isReady
+          ? current.toLocaleTimeString([], {
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit',
+            })
+          : '--:--:--'}
       </span>
     </div>
   );

@@ -1,17 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useSimulationStore } from '../store/simulationStore';
 import { paceToSpeedMps } from '../lib/simulation/pace';
-
-const TICK_INTERVAL_MS = 250;
-// Watching a race unfold in real time isn't useful for planning; simulated
-// time runs faster than the wall clock while playing.
-const PLAYBACK_MULTIPLIER = 60;
+import { TICK_INTERVAL_MS } from '../config/simulationConfig';
 
 export function useTimeline() {
   const route = useSimulationStore((state) => state.route);
   const runner = useSimulationStore((state) => state.runner);
   const clockTime = useSimulationStore((state) => state.clockTime);
   const isPlaying = useSimulationStore((state) => state.isPlaying);
+  const playbackSpeed = useSimulationStore((state) => state.playbackSpeed);
   const setClockTime = useSimulationStore((state) => state.setClockTime);
   const setIsPlaying = useSimulationStore((state) => state.setIsPlaying);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -36,15 +33,19 @@ export function useTimeline() {
   }, [setIsPlaying]);
 
   const play = useCallback(() => {
+    const current = useSimulationStore.getState().clockTime ?? rangeStart;
+    if (current.getTime() >= rangeEnd.getTime()) {
+      setClockTime(rangeStart);
+    }
     setIsPlaying(true);
-  }, [setIsPlaying]);
+  }, [setIsPlaying, setClockTime, rangeStart, rangeEnd]);
 
   useEffect(() => {
     if (!isPlaying) return;
 
     intervalRef.current = setInterval(() => {
       const current = useSimulationStore.getState().clockTime ?? rangeStart;
-      const next = new Date(current.getTime() + TICK_INTERVAL_MS * PLAYBACK_MULTIPLIER);
+      const next = new Date(current.getTime() + TICK_INTERVAL_MS * playbackSpeed);
       if (next.getTime() >= rangeEnd.getTime()) {
         setClockTime(rangeEnd);
         pause();
@@ -56,7 +57,7 @@ export function useTimeline() {
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [isPlaying, rangeStart, rangeEnd, setClockTime, pause]);
+  }, [isPlaying, playbackSpeed, rangeStart, rangeEnd, setClockTime, pause]);
 
   return { rangeStart, rangeEnd, clockTime, isPlaying, scrub, play, pause };
 }

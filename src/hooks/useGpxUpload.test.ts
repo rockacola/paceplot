@@ -39,4 +39,16 @@ describe('useGpxUpload', () => {
     });
     expect(useSimulationStore.getState().route).toBeNull();
   });
+
+  it('tracks the chosen file name, valid or not', async () => {
+    const { result } = renderHook(() => useGpxUpload());
+
+    await act(async () => {
+      await result.current.handleFile(gpxFile(sparseRoute, 'sparse-route.gpx'));
+    });
+
+    await waitFor(() => {
+      expect(result.current.fileName).toBe('sparse-route.gpx');
+    });
+  });
 });

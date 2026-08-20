@@ -21,6 +21,7 @@ const runner: Runner = {
   name: 'Test runner',
   startTime: new Date('2026-08-20T08:00:00Z'),
   pace: { minPerKm: 5 },
+  color: '#2563eb',
 };
 
 describe('useTimeline', () => {
@@ -79,5 +80,25 @@ describe('useTimeline', () => {
       vi.advanceTimersByTime(1000);
     });
     expect(useSimulationStore.getState().clockTime?.getTime()).toBe(afterPause);
+  });
+
+  it('play restarts from the beginning once the clock has reached the end', () => {
+    const { result } = renderHook(() => useTimeline());
+
+    act(() => {
+      result.current.scrub(result.current.rangeEnd);
+    });
+    expect(useSimulationStore.getState().clockTime?.getTime()).toBe(
+      result.current.rangeEnd.getTime()
+    );
+
+    act(() => {
+      result.current.play();
+    });
+
+    expect(useSimulationStore.getState().clockTime?.getTime()).toBe(
+      result.current.rangeStart.getTime()
+    );
+    expect(useSimulationStore.getState().isPlaying).toBe(true);
   });
 });

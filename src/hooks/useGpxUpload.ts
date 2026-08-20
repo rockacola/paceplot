@@ -1,24 +1,25 @@
 import { useState } from 'react';
-import { validateGpx } from '../lib/gpx/validateGpx';
-import { parseGpx } from '../lib/gpx/parseGpx';
+import { loadRouteFromGpxText } from '../lib/gpx/loadRouteFromGpxText';
 import { useSimulationStore } from '../store/simulationStore';
 
 export function useGpxUpload() {
   const setRoute = useSimulationStore((state) => state.setRoute);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [fileName, setFileName] = useState<string | null>(null);
 
   async function handleFile(file: File) {
+    setFileName(file.name);
     setIsLoading(true);
     setError(null);
     try {
       const text = await file.text();
-      const validation = validateGpx(text);
-      if (!validation.valid) {
-        setError(validation.reason);
+      const result = loadRouteFromGpxText(text);
+      if ('error' in result) {
+        setError(result.error);
         return;
       }
-      setRoute(parseGpx(text));
+      setRoute(result.route);
     } catch {
       setError('Could not read this file.');
     } finally {
@@ -26,5 +27,5 @@ export function useGpxUpload() {
     }
   }
 
-  return { error, isLoading, handleFile };
+  return { error, isLoading, fileName, handleFile };
 }

@@ -15,11 +15,17 @@ describe('GpxUpload', () => {
     useSimulationStore.setState({ route: null, runner: null, clockTime: null, isPlaying: false });
   });
 
-  it('uploads a valid file and stores the route with no visible error', async () => {
+  it('shows a placeholder before any file is chosen', () => {
+    render(<GpxUpload />);
+    expect(screen.getByText('No file chosen')).toBeInTheDocument();
+  });
+
+  it('uploads a valid file, shows its name, and stores the route with no visible error', async () => {
     render(<GpxUpload />);
     const input = screen.getByLabelText(/gpx/i);
     await userEvent.upload(input, gpxFile(cleanTrack, 'clean-track.gpx'));
 
+    expect(screen.getByText('clean-track.gpx')).toBeInTheDocument();
     expect(await screen.findByText(/clean test track/i)).toBeInTheDocument();
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });

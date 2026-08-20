@@ -22,6 +22,7 @@ function makeRunner(overrides: Partial<Runner> = {}): Runner {
     name: 'Test runner',
     startTime: new Date('2026-08-20T08:00:00Z'),
     pace: { minPerKm: 5 },
+    color: '#2563eb',
     ...overrides,
   };
 }

@@ -7,4 +7,5 @@ export type Runner = {
   name: string;
   startTime: Date;
   pace: Pace;
+  color: string;
 };
