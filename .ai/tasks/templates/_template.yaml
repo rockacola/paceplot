@@ -1,0 +1,11 @@
+id: <number>-<slug> # e.g. 001-multi-runner-store
+title: <verb-first title>
+status: pending # pending | in_progress | done | cancelled
+phase: <phase-doc-slug, e.g. phase-2-multi-runner> # which .ai/phases/ doc this implements
+created_at: <ISO 8601 date>
+description: >
+  Objective: <what this task achieves>.
+
+  Acceptance criteria: <how to know it's done>.
+depends_on: [] # other task ids, if any
+output: null # filled in once done: files touched, or a short summary
