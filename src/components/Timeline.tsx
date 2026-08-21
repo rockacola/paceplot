@@ -1,12 +1,13 @@
 import { useTimeline } from '../hooks/useTimeline';
 import { useSimulationStore } from '../store/simulationStore';
+import { PlaybackSpeedControl } from './PlaybackSpeedControl';
 
 export function Timeline() {
   const route = useSimulationStore((state) => state.route);
-  const runner = useSimulationStore((state) => state.runner);
+  const runners = useSimulationStore((state) => state.runners);
   const { rangeStart, rangeEnd, clockTime, isPlaying, scrub, play, pause } = useTimeline();
 
-  const isReady = Boolean(route && runner);
+  const isReady = Boolean(route && runners.length > 0);
   const current = clockTime ?? rangeStart;
 
   return (
@@ -38,6 +39,7 @@ export function Timeline() {
             })
           : '--:--:--'}
       </span>
+      <PlaybackSpeedControl />
     </div>
   );
 }

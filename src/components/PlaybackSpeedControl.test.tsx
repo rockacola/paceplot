@@ -10,17 +10,14 @@ describe('PlaybackSpeedControl', () => {
     useSimulationStore.setState({ playbackSpeed: DEFAULT_PLAYBACK_SPEED });
   });
 
-  it('marks the default speed as pressed', () => {
+  it('shows the current speed selected in the dropdown', () => {
     render(<PlaybackSpeedControl />);
-    expect(screen.getByRole('button', { name: `x${DEFAULT_PLAYBACK_SPEED}` })).toHaveAttribute(
-      'aria-pressed',
-      'true'
-    );
+    expect(screen.getByLabelText(/playback speed/i)).toHaveValue(String(DEFAULT_PLAYBACK_SPEED));
   });
 
-  it('updates the store when a different speed is clicked', async () => {
+  it('updates the store when a different speed is chosen', async () => {
     render(<PlaybackSpeedControl />);
-    await userEvent.click(screen.getByRole('button', { name: 'x40' }));
-    expect(useSimulationStore.getState().playbackSpeed).toBe(40);
+    await userEvent.selectOptions(screen.getByLabelText(/playback speed/i), 'x120');
+    expect(useSimulationStore.getState().playbackSpeed).toBe(120);
   });
 });

@@ -12,7 +12,7 @@ function gpxFile(contents: string, name: string) {
 
 describe('GpxUpload', () => {
   beforeEach(() => {
-    useSimulationStore.setState({ route: null, runner: null, clockTime: null, isPlaying: false });
+    useSimulationStore.setState({ route: null, runners: [], clockTime: null, isPlaying: false });
   });
 
   it('shows a placeholder before any file is chosen', () => {

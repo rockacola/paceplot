@@ -1,18 +1,23 @@
 import { MapContainer, Marker, Polyline, TileLayer, useMap } from 'react-leaflet';
-import { useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
 import L from 'leaflet';
 import '../lib/leafletIconFix';
-import { DEFAULT_RUNNER_COLOR } from '../config/runnerDefaults';
 import type { Route } from '../types/route';
 
 const DEFAULT_CENTER: [number, number] = [0, 0];
 const DEFAULT_ZOOM = 2;
 const DOT_DIAMETER_PX = 16;
 
+export type RunnerMarker = {
+  id: string;
+  lat: number;
+  lng: number;
+  color: string;
+};
+
 type MapViewProps = {
   route: Route | null;
-  runnerPosition: { lat: number; lng: number } | null;
-  runnerColor?: string;
+  runnerMarkers: RunnerMarker[];
 };
 
 function FitRouteBounds({ route }: { route: Route }) {
@@ -32,13 +37,7 @@ function createDotIcon(color: string) {
   });
 }
 
-export function MapView({
-  route,
-  runnerPosition,
-  runnerColor = DEFAULT_RUNNER_COLOR,
-}: MapViewProps) {
-  const dotIcon = useMemo(() => createDotIcon(runnerColor), [runnerColor]);
-
+export function MapView({ route, runnerMarkers }: MapViewProps) {
   return (
     <MapContainer
       center={DEFAULT_CENTER}
@@ -56,9 +55,13 @@ export function MapView({
           <FitRouteBounds route={route} />
         </>
       )}
-      {runnerPosition && (
-        <Marker position={[runnerPosition.lat, runnerPosition.lng]} icon={dotIcon} />
-      )}
+      {runnerMarkers.map((marker) => (
+        <Marker
+          key={marker.id}
+          position={[marker.lat, marker.lng]}
+          icon={createDotIcon(marker.color)}
+        />
+      ))}
     </MapContainer>
   );
 }

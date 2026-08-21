@@ -15,19 +15,23 @@ const route: Route = {
   points,
   totalDistanceM: points[points.length - 1].cumulativeDistanceM,
 };
-const runner: Runner = {
-  id: 'runner-1',
-  name: 'Test runner',
-  startTime: new Date('2026-08-20T08:00:00Z'),
-  pace: { minPerKm: 5 },
-  color: '#2563eb',
-};
+
+function makeRunner(overrides: Partial<Runner> = {}): Runner {
+  return {
+    id: 'runner-1',
+    name: 'Test runner',
+    startTime: new Date('2026-08-20T08:00:00Z'),
+    pace: { minPerKm: 5 },
+    color: '#2563eb',
+    ...overrides,
+  };
+}
 
 describe('useSimulationStore', () => {
   beforeEach(() => {
     useSimulationStore.setState({
       route: null,
-      runner: null,
+      runners: [],
       clockTime: null,
       isPlaying: false,
     });
@@ -36,7 +40,7 @@ describe('useSimulationStore', () => {
   it('starts with an empty state', () => {
     const state = useSimulationStore.getState();
     expect(state.route).toBeNull();
-    expect(state.runner).toBeNull();
+    expect(state.runners).toEqual([]);
     expect(state.clockTime).toBeNull();
     expect(state.isPlaying).toBe(false);
     expect(state.playbackSpeed).toBe(DEFAULT_PLAYBACK_SPEED);
@@ -47,9 +51,35 @@ describe('useSimulationStore', () => {
     expect(useSimulationStore.getState().route).toBe(route);
   });
 
-  it('setRunner stores the runner', () => {
-    useSimulationStore.getState().setRunner(runner);
-    expect(useSimulationStore.getState().runner).toBe(runner);
+  it('addRunner appends a runner', () => {
+    const runner = makeRunner();
+    useSimulationStore.getState().addRunner(runner);
+    expect(useSimulationStore.getState().runners).toEqual([runner]);
+
+    const second = makeRunner({ id: 'runner-2' });
+    useSimulationStore.getState().addRunner(second);
+    expect(useSimulationStore.getState().runners).toEqual([runner, second]);
+  });
+
+  it('updateRunner replaces the runner with the matching id, leaving others untouched', () => {
+    const first = makeRunner({ id: 'runner-1' });
+    const second = makeRunner({ id: 'runner-2' });
+    useSimulationStore.setState({ runners: [first, second] });
+
+    const updatedFirst = { ...first, pace: { minPerKm: 4 } };
+    useSimulationStore.getState().updateRunner(updatedFirst);
+
+    expect(useSimulationStore.getState().runners).toEqual([updatedFirst, second]);
+  });
+
+  it('removeRunner drops the runner with the matching id', () => {
+    const first = makeRunner({ id: 'runner-1' });
+    const second = makeRunner({ id: 'runner-2' });
+    useSimulationStore.setState({ runners: [first, second] });
+
+    useSimulationStore.getState().removeRunner('runner-1');
+
+    expect(useSimulationStore.getState().runners).toEqual([second]);
   });
 
   it('setClockTime stores the clock time', () => {
@@ -66,7 +96,7 @@ describe('useSimulationStore', () => {
   });
 
   it('setPlaybackSpeed stores the playback speed', () => {
-    useSimulationStore.getState().setPlaybackSpeed(40);
-    expect(useSimulationStore.getState().playbackSpeed).toBe(40);
+    useSimulationStore.getState().setPlaybackSpeed(120);
+    expect(useSimulationStore.getState().playbackSpeed).toBe(120);
   });
 });

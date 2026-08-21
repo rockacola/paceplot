@@ -29,7 +29,7 @@ describe('useTimeline', () => {
     vi.useFakeTimers();
     useSimulationStore.setState({
       route,
-      runner,
+      runners: [runner],
       clockTime: runner.startTime,
       isPlaying: false,
     });
@@ -100,5 +100,57 @@ describe('useTimeline', () => {
       result.current.rangeStart.getTime()
     );
     expect(useSimulationStore.getState().isPlaying).toBe(true);
+  });
+
+  it('runs one stable interval while playing, instead of recreating it every tick', () => {
+    // A route long enough that several ticks pass before the runner finishes,
+    // so the interval stays alive across multiple ticks.
+    const longPoints = buildRoutePoints([
+      { lat: 0, lng: 0 },
+      { lat: 0, lng: 90 },
+    ]);
+    useSimulationStore.setState({
+      route: {
+        id: 'long-route',
+        name: 'Long route',
+        points: longPoints,
+        totalDistanceM: longPoints[1].cumulativeDistanceM,
+      },
+      runners: [runner],
+      clockTime: runner.startTime,
+      isPlaying: false,
+    });
+
+    const setIntervalSpy = vi.spyOn(globalThis, 'setInterval');
+    const clearIntervalSpy = vi.spyOn(globalThis, 'clearInterval');
+    const { result } = renderHook(() => useTimeline());
+
+    act(() => {
+      result.current.play();
+    });
+    setIntervalSpy.mockClear();
+    clearIntervalSpy.mockClear();
+
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+
+    expect(useSimulationStore.getState().isPlaying).toBe(true);
+    expect(setIntervalSpy).not.toHaveBeenCalled();
+    expect(clearIntervalSpy).not.toHaveBeenCalled();
+  });
+
+  it('spans the range across every runner in the store, not just one', () => {
+    const secondRunner: Runner = {
+      id: 'runner-2',
+      name: 'Second runner',
+      startTime: new Date('2026-08-20T07:00:00Z'),
+      pace: { minPerKm: 5 },
+      color: '#dc2626',
+    };
+    useSimulationStore.setState({ runners: [runner, secondRunner] });
+
+    const { result } = renderHook(() => useTimeline());
+    expect(result.current.rangeStart.getTime()).toBe(secondRunner.startTime.getTime());
   });
 });

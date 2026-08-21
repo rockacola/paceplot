@@ -5,13 +5,13 @@ import { RunnerControls } from './RunnerControls';
 
 function baseProps() {
   return {
+    runnerId: 'runner-1',
     timeValue: '07:30',
     setTimeValue: vi.fn(),
     paceMinValue: '6',
     setPaceMinValue: vi.fn(),
     paceSecValue: '0',
     setPaceSecValue: vi.fn(),
-    color: '#2563eb',
   };
 }
 
@@ -38,8 +38,11 @@ describe('RunnerControls', () => {
     expect(props.setTimeValue).toHaveBeenCalled();
   });
 
-  it('renders a color swatch next to the grouped inputs', () => {
-    const { container } = render(<RunnerControls {...baseProps()} />);
-    expect(container.querySelector('[aria-hidden="true"]')).not.toBeNull();
+  it('namespaces its field ids by runnerId, so two instances never collide', () => {
+    const { container: containerA } = render(<RunnerControls {...baseProps()} runnerId="a" />);
+    const { container: containerB } = render(<RunnerControls {...baseProps()} runnerId="b" />);
+    const idA = containerA.querySelector('input[type="time"]')?.id;
+    const idB = containerB.querySelector('input[type="time"]')?.id;
+    expect(idA).not.toBe(idB);
   });
 });

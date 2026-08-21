@@ -8,7 +8,7 @@ import cleanTrack from '../lib/gpx/fixtures/clean-track.gpx?raw';
 
 describe('RouteSelect', () => {
   beforeEach(() => {
-    useSimulationStore.setState({ route: null, runner: null, clockTime: null, isPlaying: false });
+    useSimulationStore.setState({ route: null, runners: [], clockTime: null, isPlaying: false });
   });
 
   afterEach(() => {

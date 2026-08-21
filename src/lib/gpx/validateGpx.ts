@@ -1,7 +1,7 @@
 import { distance as turfDistance, point as turfPoint } from '@turf/turf';
 
 export const MIN_TRACK_POINT_COUNT = 10;
-export const MAX_POINT_GAP_M = 500;
+export const MAX_POINT_GAP_M = 700;
 
 export type GpxValidationResult = { valid: true } | { valid: false; reason: string };
 

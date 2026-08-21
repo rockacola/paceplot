@@ -1,4 +1,4 @@
-export type IconName = 'upload';
+export type IconName = 'upload' | 'chevron-down' | 'close';
 
 type IconProps = {
   name: IconName;
@@ -8,6 +8,8 @@ type IconProps = {
 
 const ICON_PATHS: Record<IconName, string[]> = {
   upload: ['M10 12.5V3.5', 'M6 7.5 10 3.5 14 7.5', 'M3.5 13.5v2a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-2'],
+  'chevron-down': ['M5 7.5 10 12.5 15 7.5'],
+  close: ['M5 5l10 10', 'M15 5 5 15'],
 };
 
 export function Icon({ name, size = 16, className }: IconProps) {

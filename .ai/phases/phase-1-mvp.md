@@ -202,7 +202,7 @@ Storybook: adopted only where it earns its place, presentational components with
 
 The spec above named the rules but left some numbers and edge behaviors open. Resolved while building:
 
-- GPX validation thresholds: minimum 10 track points, max 500m gap between consecutive points
+- GPX validation thresholds: minimum 10 track points, max 500m gap between consecutive points (raised to 700m in phase 3, see that doc)
 - Start time input is time-of-day applied to today's date, no date picker in MVP
 - Timeline playback runs at 60x simulated speed (1 real second = 1 simulated minute), a 1x rate would make the scrubber the only usable control
 

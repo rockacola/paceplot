@@ -33,13 +33,27 @@ export default meta;
 type Story = StoryObj<typeof MapView>;
 
 export const Empty: Story = {
-  args: { route: null, runnerPosition: null },
+  args: { route: null, runnerMarkers: [] },
 };
 
 export const WithRoute: Story = {
-  args: { route, runnerPosition: null },
+  args: { route, runnerMarkers: [] },
 };
 
 export const WithRunnerPosition: Story = {
-  args: { route, runnerPosition: { lat: -33.863, lng: 151.2125 } },
+  args: {
+    route,
+    runnerMarkers: [{ id: 'runner-1', lat: -33.863, lng: 151.2125, color: '#2563eb' }],
+  },
+};
+
+export const WithMultipleRunners: Story = {
+  args: {
+    route,
+    runnerMarkers: [
+      { id: 'runner-1', lat: -33.863, lng: 151.2125, color: '#2563eb' },
+      { id: 'runner-2', lat: -33.867, lng: 151.2105, color: '#dc2626' },
+      { id: 'runner-3', lat: -33.859, lng: 151.2115, color: '#16a34a' },
+    ],
+  },
 };

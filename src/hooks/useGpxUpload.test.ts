@@ -11,7 +11,7 @@ function gpxFile(contents: string, name: string) {
 
 describe('useGpxUpload', () => {
   beforeEach(() => {
-    useSimulationStore.setState({ route: null, runner: null, clockTime: null, isPlaying: false });
+    useSimulationStore.setState({ route: null, runners: [], clockTime: null, isPlaying: false });
   });
 
   it('stores the parsed route in the simulation store on a valid file', async () => {

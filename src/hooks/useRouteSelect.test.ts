@@ -8,7 +8,7 @@ import sparseRoute from '../lib/gpx/fixtures/sparse-route.gpx?raw';
 
 describe('useRouteSelect', () => {
   beforeEach(() => {
-    useSimulationStore.setState({ route: null, runner: null, clockTime: null, isPlaying: false });
+    useSimulationStore.setState({ route: null, runners: [], clockTime: null, isPlaying: false });
   });
 
   afterEach(() => {

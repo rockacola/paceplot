@@ -1,17 +1,24 @@
 import type { ReactNode } from 'react';
 import { MapView } from './components/MapView';
 import { RouteSelect } from './components/RouteSelect';
-import { RunnerControls } from './components/RunnerControls';
+import { RunnerList } from './components/RunnerList';
 import { RunnerApplyButton } from './components/RunnerApplyButton';
-import { PlaybackSpeedControl } from './components/PlaybackSpeedControl';
 import { Timeline } from './components/Timeline';
 import { useSimulationStore } from './store/simulationStore';
-import { useRunnerForm } from './hooks/useRunnerForm';
-import { getRunnerPosition } from './lib/simulation/position';
+import { useRunnersForm } from './hooks/useRunnersForm';
+import { getRunnersPositions } from './lib/simulation/getRunnersPositions';
 
-function SidebarSection({ title, children }: { title: string; children: ReactNode }) {
+function SidebarSection({
+  title,
+  bare = false,
+  children,
+}: {
+  title: string;
+  bare?: boolean;
+  children: ReactNode;
+}) {
   return (
-    <section className="rounded-lg border border-slate-200 p-4">
+    <section className={bare ? undefined : 'rounded-lg border border-slate-200 p-4'}>
       <h2 className="mb-3 text-sm font-semibold tracking-wide text-slate-500 uppercase">{title}</h2>
       {children}
     </section>
@@ -20,12 +27,11 @@ function SidebarSection({ title, children }: { title: string; children: ReactNod
 
 function App() {
   const route = useSimulationStore((state) => state.route);
-  const runner = useSimulationStore((state) => state.runner);
+  const runners = useSimulationStore((state) => state.runners);
   const clockTime = useSimulationStore((state) => state.clockTime);
-  const runnerForm = useRunnerForm();
+  const runnersForm = useRunnersForm();
 
-  const runnerPosition =
-    route && runner && clockTime ? getRunnerPosition(route, runner, clockTime) : null;
+  const runnerMarkers = clockTime ? getRunnersPositions(route, runners, clockTime) : [];
 
   return (
     <div className="flex h-screen flex-col">
@@ -39,27 +45,22 @@ function App() {
           <SidebarSection title="Route">
             <RouteSelect />
           </SidebarSection>
-          <SidebarSection title="Runner">
-            <RunnerControls
-              timeValue={runnerForm.timeValue}
-              setTimeValue={runnerForm.setTimeValue}
-              paceMinValue={runnerForm.paceMinValue}
-              setPaceMinValue={runnerForm.setPaceMinValue}
-              paceSecValue={runnerForm.paceSecValue}
-              setPaceSecValue={runnerForm.setPaceSecValue}
-              color={runnerForm.color}
+          <SidebarSection title="Runners" bare>
+            <RunnerList
+              entries={runnersForm.entries}
+              addRunner={runnersForm.addRunner}
+              removeRunner={runnersForm.removeRunner}
+              canAddRunner={runnersForm.canAddRunner}
+              canRemoveRunner={runnersForm.canRemoveRunner}
             />
           </SidebarSection>
           <RunnerApplyButton
-            hasPendingChanges={runnerForm.hasPendingChanges}
-            onApply={runnerForm.apply}
+            hasPendingChanges={runnersForm.hasPendingChanges}
+            onApply={runnersForm.applyAll}
           />
-          <SidebarSection title="Playback">
-            <PlaybackSpeedControl />
-          </SidebarSection>
         </aside>
         <main className="relative flex-1">
-          <MapView route={route} runnerPosition={runnerPosition} runnerColor={runner?.color} />
+          <MapView route={route} runnerMarkers={runnerMarkers} />
         </main>
       </div>
       <footer className="border-t border-slate-200 p-4">

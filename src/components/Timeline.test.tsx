@@ -29,7 +29,7 @@ describe('Timeline', () => {
   beforeEach(() => {
     useSimulationStore.setState({
       route,
-      runner,
+      runners: [runner],
       clockTime: runner.startTime,
       isPlaying: false,
     });
@@ -47,16 +47,21 @@ describe('Timeline', () => {
     expect(screen.getByRole('button', { name: /pause/i })).toBeInTheDocument();
   });
 
-  it('renders a disabled scrubber and play button without a runner, instead of unmounting', () => {
-    useSimulationStore.setState({ route, runner: null, clockTime: null, isPlaying: false });
+  it('renders a disabled scrubber and play button without any runners, instead of unmounting', () => {
+    useSimulationStore.setState({ route, runners: [], clockTime: null, isPlaying: false });
     render(<Timeline />);
     expect(screen.getByRole('slider')).toBeDisabled();
     expect(screen.getByRole('button', { name: /play/i })).toBeDisabled();
   });
 
-  it('enables the controls once a route and runner both exist', () => {
+  it('enables the controls once a route and at least one runner both exist', () => {
     render(<Timeline />);
     expect(screen.getByRole('slider')).toBeEnabled();
     expect(screen.getByRole('button', { name: /play/i })).toBeEnabled();
+  });
+
+  it('includes the playback speed control', () => {
+    render(<Timeline />);
+    expect(screen.getByLabelText(/playback speed/i)).toBeInTheDocument();
   });
 });
