@@ -1,6 +1,6 @@
 # Phase 2: UX polish
 
-**Status:** built (2026-08-21), pending the user's own in-browser check
+**Status:** done (2026-08-21), confirmed complete by the user
 
 ## Mini plan
 
