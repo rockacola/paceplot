@@ -1,12 +1,15 @@
-import { MapContainer, Marker, Polyline, TileLayer, useMap } from 'react-leaflet';
-import { useEffect } from 'react';
+import { MapContainer, Marker, Polyline, TileLayer, useMap, useMapEvent } from 'react-leaflet';
+import { useEffect, useState } from 'react';
 import L from 'leaflet';
 import '../lib/leafletIconFix';
+import { getKmMarkers } from '../lib/simulation/getKmMarkers';
+import { KM_MARKER_INTERVAL_KM, KM_MARKER_MIN_ZOOM } from '../config/mapConfig';
 import type { Route } from '../types/route';
 
 const DEFAULT_CENTER: [number, number] = [0, 0];
 const DEFAULT_ZOOM = 2;
 const DOT_DIAMETER_PX = 16;
+const KM_MARKER_DIAMETER_PX = 22;
 
 export type RunnerMarker = {
   id: string;
@@ -37,6 +40,36 @@ function createDotIcon(color: string) {
   });
 }
 
+function createKmMarkerIcon(km: number) {
+  return L.divIcon({
+    className: 'km-marker',
+    html: `<span style="display:flex;align-items:center;justify-content:center;width:${KM_MARKER_DIAMETER_PX}px;height:${KM_MARKER_DIAMETER_PX}px;border-radius:9999px;background:white;border:1.5px solid #94a3b8;color:#334155;font-size:10px;font-weight:600;box-shadow:0 1px 2px rgba(15,23,42,0.15);">${km}</span>`,
+    iconSize: [KM_MARKER_DIAMETER_PX, KM_MARKER_DIAMETER_PX],
+    iconAnchor: [KM_MARKER_DIAMETER_PX / 2, KM_MARKER_DIAMETER_PX / 2],
+  });
+}
+
+function KmMarkers({ route }: { route: Route }) {
+  const map = useMap();
+  const [zoom, setZoom] = useState(() => map.getZoom());
+  useMapEvent('zoomend', () => setZoom(map.getZoom()));
+
+  if (zoom < KM_MARKER_MIN_ZOOM) return null;
+
+  return (
+    <>
+      {getKmMarkers(route, KM_MARKER_INTERVAL_KM).map((marker) => (
+        <Marker
+          key={marker.km}
+          position={[marker.lat, marker.lng]}
+          icon={createKmMarkerIcon(marker.km)}
+          interactive={false}
+        />
+      ))}
+    </>
+  );
+}
+
 export function MapView({ route, runnerMarkers }: MapViewProps) {
   return (
     <MapContainer
@@ -53,6 +86,7 @@ export function MapView({ route, runnerMarkers }: MapViewProps) {
         <>
           <Polyline positions={route.points.map((p) => [p.lat, p.lng])} />
           <FitRouteBounds route={route} />
+          <KmMarkers route={route} />
         </>
       )}
       {runnerMarkers.map((marker) => (

@@ -46,19 +46,28 @@ describe('getRunnersPositions', () => {
     expect(positions[1]).toMatchObject({ id: 'b', color: '#00ff00' });
   });
 
-  it('drops runners that have not started yet or have already finished', () => {
+  it('drops a runner that has not started yet', () => {
     const notStarted = makeRunner({
       id: 'not-started',
       startTime: new Date('2026-08-20T09:00:00Z'),
     });
+    const clockTime = new Date('2026-08-20T08:00:00Z');
+
+    expect(getRunnersPositions(route, [notStarted], clockTime)).toEqual([]);
+  });
+
+  it('keeps a finished runner at the finish line, instead of dropping it', () => {
     const finished = makeRunner({
       id: 'finished',
       startTime: new Date('2026-08-20T00:00:00Z'),
     });
     const clockTime = new Date('2026-08-20T08:00:00Z');
+    const finishPoint = points[points.length - 1];
 
-    const positions = getRunnersPositions(route, [notStarted, finished], clockTime);
+    const positions = getRunnersPositions(route, [finished], clockTime);
 
-    expect(positions).toEqual([]);
+    expect(positions).toEqual([
+      { id: 'finished', color: finished.color, lat: finishPoint.lat, lng: finishPoint.lng },
+    ]);
   });
 });

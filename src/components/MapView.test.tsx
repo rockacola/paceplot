@@ -47,4 +47,18 @@ describe('MapView', () => {
     const { container } = render(<MapView route={route} runnerMarkers={[]} />);
     expect(container.querySelectorAll('.runner-dot-marker')).toHaveLength(0);
   });
+
+  it('hides km markers at the default (low, whole-route) zoom, even on a long route', () => {
+    const longRoute: Route = {
+      id: 'long-route',
+      name: 'Long route',
+      points: [
+        { lat: -33.8688, lng: 151.2093, cumulativeDistanceM: 0 },
+        { lat: -33.9, lng: 151.22, cumulativeDistanceM: 22000 },
+      ],
+      totalDistanceM: 22000,
+    };
+    const { container } = render(<MapView route={longRoute} runnerMarkers={[]} />);
+    expect(container.querySelectorAll('.km-marker')).toHaveLength(0);
+  });
 });

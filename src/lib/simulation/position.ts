@@ -11,8 +11,9 @@ export function getRunnerPosition(
   const elapsedSeconds = (clockTime.getTime() - runner.startTime.getTime()) / 1000;
   if (elapsedSeconds < 0) return null;
 
+  // pointAtDistance clamps internally, so once finished this keeps returning
+  // the finish-line point rather than nothing: the marker stays put instead
+  // of disappearing when the runner completes the route.
   const distanceM = paceToSpeedMps(runner.pace.minPerKm) * elapsedSeconds;
-  if (distanceM > route.totalDistanceM) return null;
-
   return pointAtDistance(route.points, distanceM);
 }

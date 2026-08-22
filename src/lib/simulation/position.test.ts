@@ -41,10 +41,12 @@ describe('getRunnerPosition', () => {
     expect(position?.lat).toBeCloseTo(-33.8688, 4);
   });
 
-  it('returns null once the runner has finished the route', () => {
+  it('stays at the finish line once the runner has finished the route, instead of disappearing', () => {
     const runner = makeRunner();
     const farFuture = new Date(runner.startTime.getTime() + 1000 * 60 * 60);
-    expect(getRunnerPosition(route, runner, farFuture)).toBeNull();
+    const position = getRunnerPosition(route, runner, farFuture);
+    const finish = points[points.length - 1];
+    expect(position).toEqual({ lat: finish.lat, lng: finish.lng });
   });
 
   it('interpolates a position partway along the route', () => {
